@@ -45,7 +45,7 @@ def register():
 # Rota para teste
 @app.route('/')
 def home():
-    return 'API Flask funcionando!'
+    return render_template('index.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
