@@ -11,20 +11,15 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)  # Habilita CORS para todas as rotas
 
-# Inicializar Firebase
-#firebase_config = os.getenv("FIREBASE_CREDENTIALS_JSON")
-#if firebase_config:
-#    cred_dict = json.loads(firebase_config)
-#    cred = credentials.Certificate("path/to/serviceAccountKey.json")
-#    firebase_admin.initialize_app(cred)
-#    db = firestore.client()
-#else:
-#    raise Exception("FIREBASE_CREDENTIALS_JSON não configurada!")
-
-
-cred = credentials.Certificate("firebase-credentials.json")
-firebase_admin.initialize_app(cred)
-db = firestore.client()
+#Inicializar Firebase
+firebase_config = os.getenv("FIREBASE_CREDENTIALS_JSON")
+if firebase_config:
+    cred_dict = json.loads(firebase_config)
+    cred = credentials.Certificate("path/to/serviceAccountKey.json")
+    firebase_admin.initialize_app(cred)
+    db = firestore.client()
+else:
+    raise Exception("FIREBASE_CREDENTIALS_JSON não configurada!")
 
 
 # 📥 Rota para receber o POST do formulário
