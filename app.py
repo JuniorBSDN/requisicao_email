@@ -1,51 +1,34 @@
+from flask import Flask, request, jsonify
 import firebase_admin
 from firebase_admin import credentials, firestore
-from flask import Flask, request, jsonify, render_template
-import smtplib
-from email.mime.text import MIMEText
-import os
-import firebase_admin
-from firebase_admin import credentials
+from flask_cors import CORS
+import json, os
+
 
 app = Flask(__name__)
+CORS(app)
 
-# Inicializar Firebase com credencial
-cred = credentials.Certificate("path/to/serviceAccountKey.json")
+# Inicializa Firebase
+cred_dict = json.loads(os.environ["FIREBASE_CREDENTIALS_JSON"])
+cred = credentials.Certificate(cred_dict)
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
-# CONFIGURANDO O GMAIL PARA ENVIO AUTOMATICO
-#EMAIL_ORIGEM = 'seuemail@gmail.com'
-#SENHA = 'sua_senha_de_app'
-#def enviar_email(nome, email_destino):
- #   msg = MIMEText(f"Olá {nome}, obrigado por se cadastrar.")
-  #  msg['Subject'] = 'Cadastro Realizado'
-   # msg['From'] = EMAIL_ORIGEM
-    #msg['To'] = email_destino
-    #with smtplib.SMTP('smtp.gmail.com', 587) as smtp:
-     #   smtp.starttls()
-      #  smtp.login(EMAIL_ORIGEM, SENHA)
-       # smtp.send_message(msg)
-
-@app.route('/')
+@app.route("/")
 def home():
-    return render_template('index.html')
+    return jsonify({"mensagem": "API online!"})
 
-@app.route('/register', methods=['POST'])
+@app.route("/register", methods=["POST"])
 def register():
     data = request.get_json()
-    name = data.get('name')
-    email = data.get('email')
+    nome = data.get("name")
+    email = data.get("email")
 
-    if not name or not email:
-        return jsonify({'error': 'Nome e e-mail obrigatórios'}), 400
+    if not nome or not email:
+        return jsonify({"error": "Nome e email são obrigatórios."}), 400
 
     try:
-        doc_ref = db.collection('users').add({
-            'name': name,
-            'email': email
-        })
-        enviar_email(name, email)
-        return jsonify({'message': 'Usuário salvo com sucesso'}), 200
+        db.collection("usuarios").add({"nome": nome, "email": email})
+        return jsonify({"mensagem": "Cadastro realizado com sucesso!"}), 200
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({"error": f"Erro ao salvar no banco: {str(e)}"}), 500
